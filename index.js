@@ -4,19 +4,9 @@ const morgan = require('morgan')
 const cors = require('cors')
 const mongoose = require('mongoose')
 require('dotenv').config()
+const Person = require('./models/person')
 
-const url = process.env.MONGODB_URI
 
-mongoose.set('strictQuery', false)
-
-mongoose.connect(url)
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
-
-const Person = mongoose.model('Person', personSchema)
 
 /*
 let persons = [
@@ -47,11 +37,7 @@ app.use(express.json())
 app.use(express.static('dist'))
 app.use(morgan('tiny'))
 
-const generateId = () =>{
-  max=1000000
-  return Math.floor(Math.random() * max)
-}
-  
+ 
 app.get('/api/persons', (request, response) => {  
   Person.find({}).then(person => {    
       response.json(person)
@@ -77,21 +63,14 @@ app.post('/api/persons', (request, response) => {
     })
   }
   const {name, number} = request.body
-  const person = {
+  const person = new Person({
     name,
-    number,
-    id: generateId(),
-  }
+    number
+  })
 
-  if (persons.find(anotedPerson => anotedPerson.name.toLowerCase() === person.name.toLowerCase() )){
-    return response.status(400).json({ 
-      error: 'name must be unique' 
-    })
-  }
-
-  persons = persons.concat(person)
-  
-  response.json(person)  
+  person.save().then(savedPerson => {
+    response.json(savedPerson)  
+  }) 
 })
 
 app.delete('/api/persons/:id', (request, response) => {
