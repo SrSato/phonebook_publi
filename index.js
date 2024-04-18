@@ -31,6 +31,27 @@ app.get('/api/persons/:id', (request, response, next) => {
   .catch(error => next(error))
 })
 
+app.put('/api/persons/:id', (request, response, next) => {
+  console.log("PUT request body: ",request.body)
+  if ( !request.body.number  ) {
+    return response.status(400).json({ 
+      error: ` Phone number is needed in order to update person's info` 
+    })
+  }
+  const id = request.params.id
+  const {number} = request.body
+  const updPerson ={
+    name: request.params.name,
+    number
+  }
+
+  const person = Person.findByIdAndUpdate(id, updPerson, {new: true})
+  .then(updatedPerson =>{
+    response.json(updatedPerson)      
+  })
+  .catch(error => next(error))
+})
+
 app.post('/api/persons', (request, response, next) => {
   console.log("POST request body: ",request.body)
   if (!request.body.name || !request.body.number  ) {
