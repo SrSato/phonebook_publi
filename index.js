@@ -2,35 +2,8 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
-const mongoose = require('mongoose')
 require('dotenv').config()
 const Person = require('./models/person')
-
-
-
-/*
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]*/
 
 app.use(cors())
 app.use(express.json())
@@ -74,10 +47,14 @@ app.post('/api/persons', (request, response) => {
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id !== id)
-
-  response.status(204).end()
+  const id = request.params.id
+  Person.findByIdAndDelete(id)
+  .then(result =>{
+    response.status(204).end()  
+  })
+  .catch(error => {
+    response.status(204).end()
+  })
 })
 
 app.get('/api/info', (request, response) => {
