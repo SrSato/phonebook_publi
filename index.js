@@ -2,7 +2,23 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const mongoose = require('mongoose')
+require('dotenv').config()
 
+const url = process.env.MONGODB_URI
+
+mongoose.set('strictQuery', false)
+
+mongoose.connect(url)
+
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+})
+
+const Person = mongoose.model('Person', personSchema)
+
+/*
 let persons = [
     { 
       "id": 1,
@@ -24,7 +40,7 @@ let persons = [
       "name": "Mary Poppendieck", 
       "number": "39-23-6423122"
     }
-]
+]*/
 
 app.use(cors())
 app.use(express.json())
@@ -36,18 +52,21 @@ const generateId = () =>{
   return Math.floor(Math.random() * max)
 }
   
-app.get('/api/persons', (request, response) => {
-    response.json(persons)
+app.get('/api/persons', (request, response) => {  
+  Person.find({}).then(person => {    
+      response.json(person)
+    })  
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
-  if (person) {
-      response.json(person)
-  } else {
-      response.status(404).end()
-  }
+  const id = request.params.id
+  const person = Person.findById(id)
+  .then(person =>{
+    response.json(person)    
+  })
+  .catch(error => {
+    response.status(404).end()
+  })
 })
 
 app.post('/api/persons', (request, response) => {
